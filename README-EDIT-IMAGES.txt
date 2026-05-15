@@ -1,14 +1,30 @@
-RideTail update notes:
+RideTail Admin Image Update
 
-1) COD option removed from website. Checkout is now prepaid only.
-2) Product image change option added. Open admin-products.html in browser.
-3) You can paste image URL or upload image from computer for testing.
-4) Browser upload images are saved in localStorage, so they appear on that same browser.
-5) For permanent live website changes, edit image URLs inside script.js defaultProducts section.
-
-
-Admin Login added:
 Open admin-login.html
 Username: admin
 Password: ridetail123
-Important: This is a simple static website login for hiding the admin page. For real security, connect backend/Supabase later.
+
+Admin Products page now has 3 image slots for every product:
+1. Image 1 = Main product image
+2. Image 2 = Gallery/close-up image
+3. Image 3 = vehicle attached/lifestyle image
+
+After saving, these images update automatically on:
+- Shop product cards
+- Product detail gallery
+- Cart mini gallery
+- Checkout order summary
+
+Note: This is a static website, so uploaded images are saved in browser localStorage for testing. For permanent live admin image upload, connect backend storage such as Supabase/Firebase/Cloudinary.
+
+
+HERO BANNER UPDATE:
+1. Open admin-login.html
+2. Login: admin / ridetail123
+3. Hero Banner Settings me image, title, subtitle, button text/link update karke Save karo.
+
+RAZORPAY SETUP:
+- Checkout page me Razorpay Key ID added hai: rzp_live_SnyAGJqKUompfc
+- Client-side checkout payment open ho jayega.
+- Important: real production me payment verification ke liye backend/server webhook zaroor lagana hota hai.
+- Razorpay Secret Key kabhi bhi frontend code me mat dalna.
