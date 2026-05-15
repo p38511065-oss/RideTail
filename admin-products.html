@@ -1,9 +1,29 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Change Product Images | RideTail</title><link rel="stylesheet" href="styles.css"></head><body><script>if(localStorage.getItem("ridetail_admin_logged_in")!=="yes"){location.href="admin-login.html"}</script>
-<div class="topbar">RideTail Image Manager — Change product photos easily</div>
-<nav class="nav"><a class="menu" href="shop.html">☰</a><a class="logo" href="index.html">🐾 Ride<span>Tail</span></a><div class="desktop-only"><a href="index.html">Home</a> &nbsp; <a href="shop.html">Shop</a> &nbsp; <a href="product.html">Product</a> &nbsp; <a href="cart.html">Cart</a> &nbsp; <a href="#" onclick="adminLogout()">Logout</a></div><a class="cart-dot" data-count="0" href="cart.html">🛒</a></nav>
-<main class="container"><div class="page-head"><h1>RideTail Admin Panel</h1><p class="muted">Paste image URL or upload image from your computer. This is perfect for testing. For permanent live website images, replace URLs in <b>script.js</b> after final product photos are ready.</p><button class="btn secondary" onclick="resetProductImages()">Reset Product Images</button> <button class="btn danger" onclick="adminLogout()">Logout</button></div><div id="heroManager" class="image-manager"></div><h2 class="section-title">Product <span>Gallery Images</span></h2><div id="imageManager" class="image-manager"></div></main>
-<a class="whatsapp" href="https://wa.me/919876543210?text=Hi%20RideTail%2C%20I%20need%20help" target="_blank">☘</a>
-<footer class="footer"><div class="footer-grid"><div><div class="logo">🐾 Ride<span>Tail</span></div><p class="muted">Make your ride fun and unique with our remote controlled wagging tail accessory.</p></div><div><b>Quick Links</b><p><a href="shop.html">Shop</a><br><a href="how-it-works.html">How It Works</a><br><a href="track-order.html">Track Order</a></p></div><div><b>Support</b><p><a href="faq.html">FAQ</a><br><a href="contact.html">Contact</a><br><a href="shipping-policy.html">Shipping</a><br><a href="return-refund-policy.html">Returns</a></p></div><div><b>Payments</b><p class="muted">UPI • Cards • NetBanking</p><input class="input" placeholder="Enter your email"></div></div></footer>
-<div class="bottom-nav"><a href="index.html">⌂<br>Home</a><a href="shop.html">▦<br>Shop</a><a href="cart.html">🛒<br>Cart</a><a href="contact.html">☏<br>Support</a></div>
-<script src="script.js"></script>
-</body></html>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>RideTail Image Names</title><link rel="stylesheet" href="styles.css"></head><body><header class="nav"><a class="logo" href="index.html">🐾 RideTail</a><nav><a href="admin-orders.html">Orders</a><a href="index.html">Website</a><button class="btn secondary" onclick="adminLogout()">Logout</button></nav></header><main class="section"><h1>Fixed Image Name System</h1><p class="muted">Admin upload बंद कर दिया गया है. अब images folder में same नाम की image replace करोगे तो website में automatically change हो जाएगी.</p><div class="card"><h2>Important</h2><p>Image change करने के लिए: <b>ridetail-website/images/</b> folder खोलो, नीचे दिए गए exact filename से image replace करो, फिर website दुबारा upload/deploy करो.</p><p class="muted">Browser में पुरानी image दिखे तो hard refresh करो: Ctrl + F5.</p></div><div class="card"><h2>Hero Banner</h2><code>images/hero-banner.png</code></div><div class="card"><h2>Product Image Names</h2><pre class="codebox">Grey White:
+images/product-grey-1.png
+images/product-grey-2.png
+images/product-grey-3.png
+
+Brown White:
+images/product-brown-1.png
+images/product-brown-2.png
+images/product-brown-3.png
+
+Pink White:
+images/product-pink-1.png
+images/product-pink-2.png
+images/product-pink-3.png
+
+Black White:
+images/product-black-1.png
+images/product-black-2.png
+images/product-black-3.png
+
+Rainbow:
+images/product-rainbow-1.png
+images/product-rainbow-2.png
+images/product-rainbow-3.png
+
+Snow White:
+images/product-white-1.png
+images/product-white-2.png
+images/product-white-3.png</pre></div></main><script src="script.js"></script><script>if(localStorage.getItem('ridetail_admin_logged_in')!=='yes') location.href='admin-login.html';</script></body></html>

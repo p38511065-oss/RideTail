@@ -1,15 +1,15 @@
 const defaultProducts=[
- {id:'grey',name:'Classic Grey',price:499,old:999,img:'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=800&q=80',gallery:['https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=80','https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=900&q=80']},
- {id:'brown',name:'Brown Fox',price:499,old:999,img:'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=800&q=80',gallery:['https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=900&q=80']},
- {id:'white',name:'Snow White',price:499,old:999,img:'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=800&q=80',gallery:['https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=900&q=80']},
- {id:'pink',name:'Cute Pink',price:549,old:1099,img:'https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=800&q=80',gallery:['https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=900&q=80']},
- {id:'black',name:'Midnight Black',price:499,old:999,img:'https://images.unsplash.com/photo-1549924231-f129b911e442?auto=format&fit=crop&w=800&q=80',gallery:['https://images.unsplash.com/photo-1549924231-f129b911e442?auto=format&fit=crop&w=900&q=80']},
- {id:'rainbow',name:'Rainbow Fun',price:649,old:1299,img:'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80',gallery:['https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=900&q=80']}
+ {id:'grey',name:'Grey White',price:499,old:999,img:'images/product-grey-1.png',gallery:['images/product-grey-1.png','images/product-grey-2.png','images/product-grey-3.png']},
+ {id:'brown',name:'Brown White',price:499,old:999,img:'images/product-brown-1.png',gallery:['images/product-brown-1.png','images/product-brown-2.png','images/product-brown-3.png']},
+ {id:'pink',name:'Pink White',price:549,old:1099,img:'images/product-pink-1.png',gallery:['images/product-pink-1.png','images/product-pink-2.png','images/product-pink-3.png']},
+ {id:'black',name:'Black White',price:549,old:1099,img:'images/product-black-1.png',gallery:['images/product-black-1.png','images/product-black-2.png','images/product-black-3.png']},
+ {id:'rainbow',name:'Rainbow Fun',price:649,old:1299,img:'images/product-rainbow-1.png',gallery:['images/product-rainbow-1.png','images/product-rainbow-2.png','images/product-rainbow-3.png']},
+ {id:'white',name:'Snow White',price:499,old:999,img:'images/product-white-1.png',gallery:['images/product-white-1.png','images/product-white-2.png','images/product-white-3.png']}
 ];
 
 const RAZORPAY_KEY_ID = 'rzp_live_SnyAGJqKUompfc';
 const defaultHero = {
-  image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=80',
+  image: 'images/hero-banner.png',
   kicker: 'Remote controlled wagging tail',
   title: 'Make Your Ride <span>Come Alive!</span>',
   subtitle: 'A fun moving tail for bike, scooty and car. Strong magnet, remote control, water-resistant design and rechargeable battery.',
@@ -48,7 +48,7 @@ function renderHeroAdmin(){
 }
 
 function getOverrides(){return JSON.parse(localStorage.getItem('ridetail_product_images')||'{}')}
-function getProducts(){const o=getOverrides();return defaultProducts.map(p=>({...p,img:o[p.id]?.img||p.img,gallery:o[p.id]?.gallery?.length?o[p.id].gallery:p.gallery}))}
+function getProducts(){return defaultProducts}
 const products=getProducts();
 function cart(){return JSON.parse(localStorage.getItem('ridetail_cart')||'[]')}
 function saveCart(c){localStorage.setItem('ridetail_cart',JSON.stringify(c));updateCartCount()}
@@ -71,6 +71,7 @@ function startRazorpayPayment(e){
   const mobile=document.getElementById('custMobile')?.value.trim();
   const address=document.getElementById('custAddress')?.value.trim();
   const city=document.getElementById('custCity')?.value.trim();
+  const email=document.getElementById('custEmail')?.value.trim()||'';
   if(!name||!mobile||!address||!city){alert('Please fill all delivery details.');return}
   if(typeof Razorpay==='undefined'){alert('Razorpay script not loaded. Please check internet connection.');return}
   const options={
@@ -79,13 +80,21 @@ function startRazorpayPayment(e){
     currency: 'INR',
     name: 'RideTail',
     description: 'RideTail Order Payment',
-    prefill: {name:name, contact:mobile},
-    notes: {address:address, city_state_pincode:city, cart: JSON.stringify(c)},
+    prefill: {name:name, contact:mobile, email:email},
+    notes: {address:address, city_state_pincode:city, customer_email: email, cart: JSON.stringify(c)},
     theme: {color: '#ff3f8f'},
     handler: function(response){
-      localStorage.setItem('ridetail_last_order',JSON.stringify({name,mobile,address,city,total,payment_id:response.razorpay_payment_id,items:c,created_at:new Date().toISOString()}));
+      const order=createRideTailOrder({
+        name,mobile,address,city,total,items:c,
+        payment_id:response.razorpay_payment_id,
+        razorpay_order_id:response.razorpay_order_id||'',
+        razorpay_signature:response.razorpay_signature||'',
+        status:'Pending Verification',
+        payment_status:'Payment Received - Manual Check Needed'
+      });
+      localStorage.setItem('ridetail_last_order',JSON.stringify(order));
       localStorage.removeItem('ridetail_cart');
-      location.href='success.html';
+      location.href='success.html?order='+encodeURIComponent(order.order_id);
     },
     modal:{ondismiss:function(){alert('Payment was not completed. You can try again.')}}
   };
@@ -96,8 +105,65 @@ function renderImageManager(){let el=document.getElementById('imageManager');if(
 function saveProductGallery(id){let o=getOverrides();let gallery=[0,1,2].map(n=>document.getElementById(`gal_${id}_${n}`).value.trim()).filter(Boolean);if(!gallery.length){alert('Please add at least Image 1');return}while(gallery.length<3)gallery.push(gallery[0]);o[id]={img:gallery[0],gallery:gallery.slice(0,3)};localStorage.setItem('ridetail_product_images',JSON.stringify(o));alert('3 images saved. They will update on Shop, Product, Cart and Checkout pages.')}
 function uploadGalleryImage(id,index,input){let file=input.files&&input.files[0];if(!file)return;let reader=new FileReader();reader.onload=()=>{document.getElementById(`gal_${id}_${index}`).value=reader.result;saveProductGallery(id)};reader.readAsDataURL(file)}
 function resetProductImages(){localStorage.removeItem('ridetail_product_images');location.reload()}
+
+function getRideTailOrders(){return JSON.parse(localStorage.getItem('ridetail_orders')||'[]')}
+function saveRideTailOrders(orders){localStorage.setItem('ridetail_orders',JSON.stringify(orders))}
+function createRideTailOrder(data){
+  const orders=getRideTailOrders();
+  const order={
+    order_id:'RT'+Date.now().toString().slice(-8),
+    created_at:new Date().toISOString(),
+    status:data.status||'Pending Verification',
+    payment_status:data.payment_status||'Payment Received - Manual Check Needed',
+    ...data
+  };
+  orders.unshift(order);
+  saveRideTailOrders(orders);
+  return order;
+}
+function updateOrderStatus(orderId,status){
+  const orders=getRideTailOrders().map(o=>o.order_id===orderId?{...o,status,updated_at:new Date().toISOString()}:o);
+  saveRideTailOrders(orders);
+  renderAdminOrders();
+}
+function deleteOrder(orderId){
+  if(!confirm('Delete this order from this admin browser?'))return;
+  saveRideTailOrders(getRideTailOrders().filter(o=>o.order_id!==orderId));
+  renderAdminOrders();
+}
+function orderItemsHtml(o){
+  return (o.items||[]).map(i=>{let p=products.find(x=>x.id===i.id)||{name:i.id,price:0,img:''};return `${p.name} × ${i.qty}`}).join('<br>') || 'No items';
+}
+function renderSuccessOrder(){
+  const el=document.getElementById('paymentInfo'); if(!el)return;
+  const params=new URLSearchParams(location.search);
+  const id=params.get('order');
+  const orders=getRideTailOrders();
+  const last=JSON.parse(localStorage.getItem('ridetail_last_order')||'{}');
+  const o=orders.find(x=>x.order_id===id)||last;
+  if(!o.order_id){el.innerHTML='<p class="muted">Order details not found on this browser.</p>';return}
+  el.innerHTML=`<div class="card order-box"><h2>Manual Verification Required</h2><p class="muted">Payment received response मिल गया है. Dispatch से पहले Razorpay dashboard में Payment ID match कर लें.</p><div class="order-grid"><div><b>Order ID</b><br>${o.order_id}</div><div><b>Payment ID</b><br>${o.payment_id||'Not available'}</div><div><b>Total</b><br>₹${o.total||0}</div><div><b>Status</b><br>${o.status||'Pending Verification'}</div></div><hr><p><b>Name:</b> ${o.name||''}<br><b>Mobile:</b> ${o.mobile||''}<br><b>Address:</b> ${o.address||''}, ${o.city||''}</p><a class="btn secondary" href="track-order.html?order=${o.order_id}">Track This Order</a></div>`;
+}
+function renderAdminOrders(){
+  const el=document.getElementById('adminOrders'); if(!el)return;
+  const orders=getRideTailOrders();
+  if(!orders.length){el.innerHTML='<div class="card"><h2>No orders yet</h2><p class="muted">Important: Static website में orders सिर्फ उसी browser में दिखेंगे जहाँ payment हुआ है. Real customer orders को एक admin में देखने के लिए backend/Google Sheet/Supabase चाहिए.</p></div>';return}
+  el.innerHTML=orders.map(o=>`<div class="card order-card"><div class="order-head"><div><span class="badge">${o.status}</span><h3>${o.order_id}</h3><p class="muted">${new Date(o.created_at).toLocaleString()}</p></div><div class="price">₹${o.total||0}</div></div><div class="order-grid"><div><b>Payment ID</b><br><span class="copy-text">${o.payment_id||'-'}</span></div><div><b>Customer</b><br>${o.name||'-'}<br>${o.mobile||''}</div><div><b>Address</b><br>${o.address||''}<br>${o.city||''}</div><div><b>Items</b><br>${orderItemsHtml(o)}</div></div><div class="status-actions"><button class="btn secondary" onclick="updateOrderStatus('${o.order_id}','Pending Verification')">Pending</button><button class="btn primary" onclick="updateOrderStatus('${o.order_id}','Verified')">Verified</button><button class="btn secondary" onclick="updateOrderStatus('${o.order_id}','Shipped')">Shipped</button><button class="btn danger" onclick="updateOrderStatus('${o.order_id}','Cancelled')">Cancelled</button><button class="btn danger" onclick="deleteOrder('${o.order_id}')">Delete</button></div><p class="muted">Razorpay Dashboard में Payment ID search करके amount/customer match करें, फिर Verified दबाएँ.</p></div>`).join('')
+}
+function renderTrackOrder(){
+  const el=document.getElementById('trackResult'); if(!el)return;
+  const params=new URLSearchParams(location.search); const id=params.get('order')||'';
+  if(id){document.getElementById('trackInput').value=id; findOrder();}
+}
+function findOrder(){
+  const id=document.getElementById('trackInput')?.value.trim(); const el=document.getElementById('trackResult'); if(!el)return;
+  const o=getRideTailOrders().find(x=>x.order_id===id);
+  if(!o){el.innerHTML='<div class="card"><b>Order not found on this browser.</b><p class="muted">Support को अपना Razorpay Payment ID भेजें.</p></div>';return}
+  el.innerHTML=`<div class="card"><h2>${o.order_id}</h2><p><b>Status:</b> ${o.status}</p><p><b>Payment ID:</b> ${o.payment_id||'-'}</p><p><b>Total:</b> ₹${o.total||0}</p><p class="muted">Payment verification के बाद dispatch update मिलेगा.</p></div>`
+}
+
 document.addEventListener('click',e=>{if(e.target.classList.contains('faq-q'))e.target.parentElement.classList.toggle('open')});
-document.addEventListener('DOMContentLoaded',()=>{updateCartCount();renderHero();renderProducts();renderProduct();renderCart();renderCheckout();renderImageManager();renderHeroAdmin()});
+document.addEventListener('DOMContentLoaded',()=>{updateCartCount();renderHero();renderProducts();renderProduct();renderCart();renderCheckout();renderImageManager();renderHeroAdmin();renderSuccessOrder();renderAdminOrders();renderTrackOrder()});
 
 const ADMIN_USERNAME = 'admin';
 const ADMIN_PASSWORD = 'ridetail123';
