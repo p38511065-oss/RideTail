@@ -57,6 +57,23 @@ function displayProductName(p){
   const map={grey:'Grey & White Edition',brown:'Brown & White Edition',pink:'Pink & White Edition',black:'Black & White Edition',rainbow:'Rainbow Edition',white:'Snow White Edition'};
   return `RideTail™ ${map[p.id]||p.name}`;
 }
+
+function rawCartTotal(){let total=0;cart().forEach(i=>{let p=products.find(x=>x.id===i.id);if(p)total+=p.price*i.qty});return total}
+function cartQtyTotal(){return cart().reduce((a,b)=>a+b.qty,0)}
+function getBundleDiscount(){
+  const qty=cartQtyTotal();
+  const subtotal=rawCartTotal();
+  if(qty>=3) return Math.round(subtotal*0.10);
+  if(qty>=2) return Math.round(subtotal*0.05);
+  return 0;
+}
+function offerLabel(){const q=cartQtyTotal(); if(q>=3)return 'Buy 3+ Offer: 10% OFF applied'; if(q>=2)return 'Buy 2 Offer: 5% OFF applied'; return 'Add 2 or 3 items to unlock offer';}
+function buyBundle(id,qty){let c=cart().filter(x=>x.id!==id);c.push({id,qty});saveCart(c);location.href='checkout.html'}
+function setBundleQty(qty){let c=cart();if(!c.length){location.href='shop.html';return}c[0].qty=qty;saveCart(c);renderCart();renderCheckout();}
+function bundleOfferHtml(context='checkout'){
+  return `<div class="card bundle-offer-card"><div><span class="badge">Combo Offer</span><h2>Buy More, Save More</h2><p class="muted">एक साथ 2 या 3 RideTail लेने पर discount automatically apply होगा.</p></div><div class="bundle-grid"><button type="button" class="bundle-box" onclick="setBundleQty(2)"><b>Buy 2</b><span>5% OFF</span><small>Best for 2 vehicles</small></button><button type="button" class="bundle-box hot" onclick="setBundleQty(3)"><b>Buy 3</b><span>10% OFF</span><small>Family / friends pack</small></button></div></div>`
+}
+function productBundleHtml(id){return `<div class="bundle-mini"><button type="button" onclick="buyBundle('${id}',2)"><b>Buy 2</b><span>5% OFF</span></button><button type="button" onclick="buyBundle('${id}',3)"><b>Buy 3</b><span>10% OFF</span></button></div>`}
 function setCartQty(id,qty){
   let c=cart();
   qty=parseInt(qty,10)||0;
@@ -83,9 +100,9 @@ function removeCartItem(id){
 }
 function addToCart(id,qty=1){let c=cart();let item=c.find(x=>x.id===id);if(item)item.qty+=qty;else c.push({id,qty});saveCart(c);alert('Added to cart')}
 function buyNow(id){addToCart(id,1);location.href='checkout.html'}
-function productCard(p){return `<div class="card product-card"><a href="product.html?id=${p.id}"><img src="${p.img}" alt="${displayProductName(p)}"><h3>${displayProductName(p)}</h3></a><div class="rating">★★★★★ <span class="muted">(4.8)</span></div><p><b>₹${p.price}</b> <span class="old">₹${p.old}</span></p><button class="btn primary" onclick="addToCart('${p.id}')">Add to Cart</button></div>`}
+function productCard(p){return `<div class="card product-card"><a href="product.html?id=${p.id}"><img src="${p.img}" alt="${displayProductName(p)}"><h3>${displayProductName(p)}</h3></a><div class="rating">★★★★★ <span class="muted">(4.8)</span></div><p><b>₹${p.price}</b> <span class="old">₹${p.old}</span></p><button class="btn primary" onclick="addToCart('${p.id}')">Add to Cart</button>${productBundleHtml(p.id)}</div>`}
 function renderProducts(){let el=document.getElementById('products');if(el)el.innerHTML=products.map(productCard).join('')}
-function renderProduct(){let el=document.getElementById('productDetail');if(!el)return;let id=new URLSearchParams(location.search).get('id')||'grey';let p=products.find(x=>x.id===id)||products[0];let imgs=(p.gallery&&p.gallery.length?p.gallery:[p.img]);el.innerHTML=`<div class="two-col"><div class="gallery"><img id="mainImg" class="main-product-img" src="${imgs[0]}"><div class="thumbs">${imgs.map((im,i)=>`<img class="${i?'':'active'}" src="${im}" onclick="mainImg.src='${im}';document.querySelectorAll('.thumbs img').forEach(t=>t.classList.remove('active'));this.classList.add('active')">`).join('')}</div></div><div class="card"><span class="badge">Best Seller</span><h1>${displayProductName(p)}</h1><div class="rating">★★★★★ <span class="muted">(4.8) 2,345 Reviews</span></div><p><span class="price">₹${p.price}</span><span class="old">₹${p.old}</span> <span class="badge">50% OFF</span></p><div class="list"><div>Remote Controlled</div><div>Strong Magnetic Base</div><div>3+ Wagging Modes</div><div>Water Resistant</div><div>Rechargeable Battery USB-C</div></div><br><button class="btn primary" onclick="addToCart('${p.id}')">Add to Cart</button><br><br><button class="btn secondary" onclick="buyNow('${p.id}')">Buy Now</button><p class="muted">Prepaid Payment • 7 Days Return • Fast Delivery</p></div></div>`}
+function renderProduct(){let el=document.getElementById('productDetail');if(!el)return;let id=new URLSearchParams(location.search).get('id')||'grey';let p=products.find(x=>x.id===id)||products[0];let imgs=(p.gallery&&p.gallery.length?p.gallery:[p.img]);el.innerHTML=`<div class="two-col"><div class="gallery"><img id="mainImg" class="main-product-img" src="${imgs[0]}"><div class="thumbs">${imgs.map((im,i)=>`<img class="${i?'':'active'}" src="${im}" onclick="mainImg.src='${im}';document.querySelectorAll('.thumbs img').forEach(t=>t.classList.remove('active'));this.classList.add('active')">`).join('')}</div></div><div class="card"><span class="badge">Best Seller</span><h1>${displayProductName(p)}</h1><div class="rating">★★★★★ <span class="muted">(4.8) 2,345 Reviews</span></div><p><span class="price">₹${p.price}</span><span class="old">₹${p.old}</span> <span class="badge">50% OFF</span></p><div class="list"><div>Remote Controlled</div><div>Strong Magnetic Base</div><div>3+ Wagging Modes</div><div>Water Resistant</div><div>Rechargeable Battery USB-C</div></div><br><button class="btn primary" onclick="addToCart('${p.id}')">Add to Cart</button><br><br><button class="btn secondary" onclick="buyNow('${p.id}')">Buy Now</button><h3>Combo Offers</h3>${productBundleHtml(p.id)}<p class="muted">Prepaid Payment • 7 Days Return • Fast Delivery</p></div></div>`}
 function miniGallery(p){let imgs=(p.gallery&&p.gallery.length?p.gallery:[p.img]).slice(0,3);while(imgs.length<3)imgs.push(p.img);return `<div class="cart-gallery">${imgs.map((im,i)=>`<img src="${im}" alt="${p.name} image ${i+1}">`).join('')}</div>`}
 function renderCart(){
   let el=document.getElementById('cartItems');if(!el)return;
@@ -96,9 +113,9 @@ function renderCart(){
     let p=products.find(x=>x.id===i.id);if(!p)return '';
     total+=p.price*i.qty;
     return `<div class="card cart-item enhanced-cart-item">${miniGallery(p)}<div><b>${displayProductName(p)}</b><p>₹${p.price} × ${i.qty}</p><div class="qty"><button type="button" onclick="changeCartQty('${p.id}',-1)">−</button><span>${i.qty}</span><button type="button" onclick="changeCartQty('${p.id}',1)">+</button></div><button type="button" class="remove-link" onclick="removeCartItem('${p.id}')">Remove</button></div></div>`
-  }).join('')+`<div class="card"><h2>Total: ₹${total}</h2><a class="btn primary glow" href="checkout.html">Checkout</a></div>`
+  }).join('')+`<div class="card">${bundleOfferHtml('cart')}<h2>Subtotal: ₹${rawCartTotal()}</h2><p class="muted">${offerLabel()}</p><h2>Total: ₹${getCartTotal()}</h2><a class="btn primary glow" href="checkout.html">Checkout</a></div>`
 }
-function getCartTotal(){let total=0;cart().forEach(i=>{let p=products.find(x=>x.id===i.id);if(p)total+=p.price*i.qty});return total}
+function getCartTotal(){return Math.max(0, rawCartTotal()-getBundleDiscount())}
 function renderCheckout(){
   let el=document.getElementById('checkoutItems');if(!el)return;
   let c=cart();
@@ -123,7 +140,7 @@ function renderCheckout(){
         <button type="button" class="remove-link" onclick="removeCartItem('${p.id}')">Remove Product</button>
       </div>
     </div>`
-  }).join('')+`<div class="card payable-card"><div class="urgency">🔥 27 people are viewing this product</div><h2>Payable: ₹${total}</h2><p class="muted">Payment will open securely through Razorpay.</p><div class="trust-row"><span>🔒 Razorpay Secure</span><span>✅ SSL Checkout</span><span>🚚 Fast Shipping</span><span>🛵 Made for Bikes & Cars</span></div></div>`
+  }).join('')+`${bundleOfferHtml('checkout')}<div class="card payable-card"><div class="urgency">🔥 27 people are viewing this product</div><p><b>Subtotal:</b> ₹${rawCartTotal()}</p><p><b>${offerLabel()}:</b> -₹${getBundleDiscount()}</p><h2>Payable: ₹${getCartTotal()}</h2><p class="muted">Payment will open securely through Razorpay.</p><div class="trust-row"><span>🔒 Razorpay Secure</span><span>✅ SSL Checkout</span><span>🚚 Fast Shipping</span><span>🛵 Made for Bikes & Cars</span></div></div>`
 }
 function startRazorpayPayment(e){
   if(e)e.preventDefault();
