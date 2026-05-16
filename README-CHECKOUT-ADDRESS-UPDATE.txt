@@ -1,0 +1,1 @@
+Checkout address updated: House/Flat, Area/Landmark, City, State, Pincode are now separate fields. script.js now saves address and city/state/pincode separately into Razorpay notes and local order data.

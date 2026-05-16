@@ -149,13 +149,39 @@ function startRazorpayPayment(e){
   const total=getCartTotal();
   const payBtn=e?.target?.querySelector('button.primary');
   if(payBtn){payBtn.dataset.oldText=payBtn.textContent;payBtn.textContent='Opening Razorpay...';payBtn.disabled=true}
+
   const name=document.getElementById('custName')?.value.trim();
   const mobile=document.getElementById('custMobile')?.value.trim();
-  const address=document.getElementById('custAddress')?.value.trim();
-  const city=document.getElementById('custCity')?.value.trim();
   const email=document.getElementById('custEmail')?.value.trim()||'';
-  if(!name||!mobile||!address||!city){if(payBtn){payBtn.textContent=payBtn.dataset.oldText;payBtn.disabled=false}alert('Please fill all delivery details.');return}
-  if(typeof Razorpay==='undefined'){if(payBtn){payBtn.textContent=payBtn.dataset.oldText;payBtn.disabled=false}alert('Razorpay script not loaded. Please check internet connection.');return}
+  const house=document.getElementById('custHouse')?.value.trim();
+  const area=document.getElementById('custArea')?.value.trim();
+  const city=document.getElementById('custCity')?.value.trim();
+  const state=document.getElementById('custState')?.value.trim();
+  const pincode=document.getElementById('custPincode')?.value.trim();
+
+  const address=`${house}, ${area}`;
+  const fullCity=`${city}, ${state} - ${pincode}`;
+
+  if(!name||!mobile||!house||!area||!city||!state||!pincode){
+    if(payBtn){payBtn.textContent=payBtn.dataset.oldText;payBtn.disabled=false}
+    alert('Please fill all delivery details.');
+    return;
+  }
+  if(!/^[0-9]{10}$/.test(mobile)){
+    if(payBtn){payBtn.textContent=payBtn.dataset.oldText;payBtn.disabled=false}
+    alert('Please enter valid 10 digit mobile number.');
+    return;
+  }
+  if(!/^[0-9]{6}$/.test(pincode)){
+    if(payBtn){payBtn.textContent=payBtn.dataset.oldText;payBtn.disabled=false}
+    alert('Please enter valid 6 digit pincode.');
+    return;
+  }
+  if(typeof Razorpay==='undefined'){
+    if(payBtn){payBtn.textContent=payBtn.dataset.oldText;payBtn.disabled=false}
+    alert('Razorpay script not loaded. Please check internet connection.');
+    return;
+  }
   const options={
     key: RAZORPAY_KEY_ID,
     amount: total*100,
@@ -163,11 +189,21 @@ function startRazorpayPayment(e){
     name: 'RideTail',
     description: 'RideTail Order Payment',
     prefill: {name:name, contact:mobile, email:email},
-    notes: {address:address, city_state_pincode:city, customer_email: email, cart: JSON.stringify(c)},
+    notes: {
+      address: address,
+      city_state_pincode: fullCity,
+      customer_email: email,
+      cart: JSON.stringify(c)
+    },
     theme: {color: '#ff3f8f'},
     handler: function(response){
       const order=createRideTailOrder({
-        name,mobile,address,city,total,items:c,
+        name,
+        mobile,
+        address,
+        city: fullCity,
+        total,
+        items:c,
         payment_id:response.razorpay_payment_id,
         razorpay_order_id:response.razorpay_order_id||'',
         razorpay_signature:response.razorpay_signature||'',
